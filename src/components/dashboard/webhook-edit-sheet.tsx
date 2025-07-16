@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import type { Webhook } from "@/lib/types";
 import { getOptimizedSettings } from "@/lib/actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Lightbulb, Terminal } from "lucide-react";
+import { Lightbulb, Download } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 
 interface WebhookEditSheetProps {
@@ -46,6 +46,18 @@ export function WebhookEditSheet({ webhook, isOpen, onOpenChange }: WebhookEditS
     }
   }, [state, toast]);
 
+  const handleDownload = () => {
+    if (!state.suggestions) return;
+    const blob = new Blob([state.suggestions], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ai-suggestions.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -97,12 +109,22 @@ export function WebhookEditSheet({ webhook, isOpen, onOpenChange }: WebhookEditS
             </Alert>
           )}
 
-           <SheetFooter className="mt-auto pt-4 bg-background sticky bottom-0">
-             <Button type="submit" className="w-full sm:w-auto">
-              <Lightbulb className="mr-2 h-4 w-4" />
-              Optimize with AI
-            </Button>
-            <Button variant="outline" className="w-full sm:w-auto">Save Changes</Button>
+           <SheetFooter className="mt-auto pt-4 bg-background sticky bottom-0 flex-col sm:flex-row sm:justify-between sm:items-center">
+             <div className="flex flex-col sm:flex-row gap-2">
+                <Button type="submit" className="w-full sm:w-auto">
+                  <Lightbulb className="mr-2 h-4 w-4" />
+                  Optimize with AI
+                </Button>
+                <Button variant="outline" className="w-full sm:w-auto">Save Changes</Button>
+             </div>
+             <Button 
+                variant="secondary" 
+                className="w-full sm:w-auto" 
+                onClick={handleDownload}
+                disabled={!state.suggestions}>
+                <Download className="mr-2 h-4 w-4" />
+                Download
+              </Button>
           </SheetFooter>
         </form>
       </SheetContent>
